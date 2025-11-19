@@ -14,13 +14,55 @@ const API_OPTIONS = {
 }
 
  const App = () => {
-  const [searchTerm, setSearchTerm] = useState('')
+  const [searchTerm, setSearchTerm] = useState('');
   const[errorMessage, setErrorMessage] = useState('')
+  const [movieList, setMovieList] = useState([]) 
+  const [isLoading, setIsLoading] = useState(false)
+  const [debounceSearchTerm, setDebounceSearchTerm] = useState('')
+  const [trendingMovies, setTrendingMovies] = useState([])
 
+  useDebounce(()=> setDebounceSearchTerm(searchTerm), 500, [searchTerm])
 
-  useEffect(() => {
+  const fetchMovies = async (query = '') => {
+    setIsLoading(true)
+    setErrorMessage('')
+   try {
+   const endpoint = query? `${API_BASE_URL}/search/movie?query=${encodeURIComponent(query)}` :`${API_BASE_URL}/discover/movie?sort_by=popularity.desc`
 
-  }, [])
+   const response = await fetch (endpoint, API_OPTIONS)
+
+if(!response.ok) {
+   throw new Error('Failed to fetch movies')
+}
+const data = await response.json()
+
+if(data.Response === 'False') {
+  setErrorMessage(data.Error || 'Failed to Fetch movies')
+  setMovieList([])
+  return;
+}
+ setMovieList(data.results || [])
+
+if(query && data.results.length > 0) {
+  await  updateSearchCount(query, data.results[0])
+}
+
+   } catch (error) {
+    console.log(`Error fetching movies: ${error}`)
+    setErrorMessage('Error fetching movies. Please try again later.')
+   } finally {
+    setIsLoading(false)
+   }
+  }
+
+  const loadTrendingMovies = async () => {
+    try {
+    const movies = await getTrendingMovies()
+     setTrendingMovies(movies)
+    } catch(error) {
+      console.error(`Error fetching trending movies: ${error}`)
+    }
+  }
   return (
     <main>
       <div className='pattern'/>
