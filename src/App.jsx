@@ -63,6 +63,13 @@ if(query && data.results.length > 0) {
       console.error(`Error fetching trending movies: ${error}`)
     }
   }
+  useEffect (()=> {
+  fetchMovies(debounceSearchTerm)
+  }, [debounceSearchTerm])
+
+  useEffect (()=> {
+    loadTrendingMovies()
+  }, [])
   return (
     <main>
       <div className='pattern'/>
