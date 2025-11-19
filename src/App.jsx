@@ -15,8 +15,9 @@ const API_OPTIONS = {
 
  const App = () => {
   const [searchTerm, setSearchTerm] = useState('')
+  const[errorMessage, setErrorMessage] = useState('')
 
-  
+
   useEffect(() => {
 
   }, [])
