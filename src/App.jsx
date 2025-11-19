@@ -1,7 +1,9 @@
-
-import React, { useEffect, useState } from 'react'
-import Search from './component/Search'
-
+import React, { useEffect, useState } from "react";
+import Search from "./component/Search";
+import Spinner from "./component/Spinner";
+import MovieCard from "./component/MovieCard";
+import { useDebounce } from "react-use";
+import { getTrendingMovies, updateSearchCount } from "./appwrite";
 
 const API_BASE_URL = 'https://api.themoviedb.org/3'
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
@@ -13,7 +15,7 @@ const API_OPTIONS = {
   }
 }
 
- const App = () => {
+const App = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const[errorMessage, setErrorMessage] = useState('')
   const [movieList, setMovieList] = useState([]) 
@@ -72,17 +74,48 @@ if(query && data.results.length > 0) {
   }, [])
   return (
     <main>
-      <div className='pattern'/>
-      <div className='wrapper'>
+      <div className="pattern"></div>
+
+      <div className="wrapper">
         <header>
           <img src="./hero.png" alt="Hero Banner" />
-         <h1>Find <span className='text-gradient'>Movies</span> you'll enjoy</h1>
+          <h1>
+            Find <span className="text-gradient">Movies </span>You'll Enjoy
+            Without the Hassle
+          </h1>
+           <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
         </header>
 
-      <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+       {trendingMovies.length > 0 && (
+        <section className="trending">
+          <h2>trending Movies</h2>
+
+          <ul>
+            {trendingMovies.map((movie, index) => (
+              <li key={movie.$id}>
+                <p>{index+1}</p>
+                <img src={movie.poster_url} alt={movie.title}/>
+              </li>
+            ))}
+          </ul>
+        </section>
+       )}
+
+       <section className="all-movies">
+        <h2>All Movies</h2>
+        {isLoading? (<Spinner/>): errorMessage?(
+          <p className="text-red-500">{errorMessage}</p>
+        ): (
+          <ul>
+            {movieList.map ((movie) => (
+             <MovieCard key={movie.id} movie={movie}/>
+            ))}
+          </ul>
+        )}
+       </section>
       </div>
     </main>
-  )
-}
+  );
+};
 
-export default App
+export default App;
